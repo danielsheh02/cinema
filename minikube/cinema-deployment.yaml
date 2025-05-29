@@ -1,0 +1,50 @@
+# cinemaapp-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cinemaapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cinemaapp
+  template:
+    metadata:
+      labels:
+        app: cinemaapp
+    spec:
+      containers:
+      - name: cinemaapp
+        image: danielsheh/cinema_cinemaapp:latest
+        ports:
+        - containerPort: 7999
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://cinemadb:5432/cinemadb
+        - name: SPRING_DATASOURCE_USERNAME
+          value: cinemadb
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: cinemadb
+        resources:
+          requests:
+            cpu: "1000m"
+          #   memory: "256Mi"
+          limits:
+            cpu: "1500m"
+          #   memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cinemaapp
+  labels:
+    app: cinemaapp
+spec:
+  type: NodePort
+  selector:
+    app: cinemaapp
+  ports:
+  - name: http
+    port: 7999
+    targetPort: 7999
+    nodePort: 30099

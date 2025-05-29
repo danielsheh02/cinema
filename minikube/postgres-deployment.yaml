@@ -1,0 +1,45 @@
+# postgres-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cinemadb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cinemadb
+  template:
+    metadata:
+      labels:
+        app: cinemadb
+    spec:
+      containers:
+      - name: postgres
+        image: postgres
+        env:
+        - name: POSTGRES_USER
+          value: cinemadb
+        - name: POSTGRES_PASSWORD
+          value: cinemadb
+        - name: POSTGRES_DB
+          value: cinemadb
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-data
+      volumes:
+      - name: postgres-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cinemadb
+spec:
+  selector:
+    app: cinemadb
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432

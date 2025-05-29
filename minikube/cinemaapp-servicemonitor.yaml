@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cinemaapp-monitor
+  labels:
+    release: prometheus   # match with release helm install "..."
+spec:
+  selector:
+    matchLabels:
+      app: cinemaapp
+  endpoints:
+  - port: http
+    path: /actuator/prometheus
+    interval: 15s
