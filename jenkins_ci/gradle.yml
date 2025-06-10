@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+
+    environment {
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64' // укажите ваш путь к JDK 17
+        PATH = "${JAVA_HOME}/bin:${PATH}"
+        WORKDIR = './backend'
+        SONAR_HOST_URL = 'http://localhost:9000/' // Замените на ваш SonarQube URL
+        SONAR_TOKEN = credentials('sonarqube-token') // Токен из Jenkins Credentials
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/danielsheh02/cinema' // укажите URL вашего репозитория
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir(env.WORKDIR) {
+                    sh './gradlew build -x test'
+                }
+                stash name: 'backend-build', includes: 'backend/build/**/*'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                dir(env.WORKDIR) {
+                    unstash 'backend-build'
+                    sh './gradlew test'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir(env.WORKDIR) {
+                    withSonarQubeEnv('SonarQube') { // Настроенный в Jenkins сервер SonarQube
+                        sh """
+                        ./gradlew sonar \
+                          -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
+                          -Dsonar.qualitygate.wait=true // Ждём проверки Quality Gate
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Dependency Submission') {
+            steps {
+                dir(env.WORKDIR) {
+                    // Аналог GitHub Actions "gradle/actions/dependency-submission"
+                    // Здесь можно использовать скрипт для анализа зависимостей, например:
+                    sh './gradlew dependencies > dependencies.txt'
+                    archiveArtifacts artifacts: 'dependencies.txt', fingerprint: true
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            dir(env.WORKDIR) {
+                junit 'build/test-results/**/*.xml' // публикация результатов тестов
+                archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true // сохранение артефактов
+            }
+        }
+    }
+}
