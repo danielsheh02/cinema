@@ -45,6 +45,8 @@ public class MovieService {
     public Movie updateMovie(Long id, MovieRequest movieRequest) {
         Movie movie = movieRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Movie not found with id " + id));
+
+        cinemaBot.notifyUpdateMovie(movie.getName(), movieRequest.getName());    
     
         movie.setName(movieRequest.getName());
         movie.setTimeDuration(movieRequest.getTimeDuration());

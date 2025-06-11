@@ -98,4 +98,11 @@ public class CinemaBot extends TelegramLongPollingBot {
             sendText(chatId, message);
         }
     }
+
+    public void notifyUpdateMovie(String oldMovieName, String newMovieName) {
+        String message = "🔄 Фильм \"" + oldMovieName + "\" был обновлен на" + newMovieName;
+        for (String chatId : userChatIds) {
+            sendText(chatId, message);
+        }
+    }
 }
