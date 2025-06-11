@@ -67,6 +67,7 @@ sonar {
   properties {
     property "sonar.projectKey", "cinema-backend"
     property "sonar.projectName", "cinema app"
+	property "sonar.qualitygate.wait", "true"
   }
 }
 
