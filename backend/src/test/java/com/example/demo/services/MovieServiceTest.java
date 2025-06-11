@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import com.app.cinema.bot.CinemaBot;
 import com.app.cinema.controllers.requestbody.MovieRequest;
 import com.app.cinema.models.Movie;
 import com.app.cinema.repositories.MovieRepository;
@@ -22,6 +23,9 @@ class MovieServiceTest {
 
     @InjectMocks
     private MovieService movieService;
+
+    @Mock
+    private CinemaBot cinemaBot;
 
     @BeforeEach
     void setUp() {

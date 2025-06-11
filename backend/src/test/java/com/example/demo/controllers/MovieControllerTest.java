@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.app.cinema.bot.CinemaBot;
 import com.app.cinema.controllers.MovieController;
 import com.app.cinema.controllers.requestbody.MovieRequest;
 import com.app.cinema.models.Movie;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -33,6 +35,9 @@ public class MovieControllerTest {
 
     @Mock
     private MovieService movieService;
+
+    @Mock
+    private CinemaBot cinemaBot;
 
     @InjectMocks
     private MovieController movieController;

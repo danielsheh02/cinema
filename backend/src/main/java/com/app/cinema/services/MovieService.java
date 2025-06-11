@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.app.cinema.bot.CinemaBot;
 import com.app.cinema.controllers.requestbody.MovieRequest;
 import com.app.cinema.models.Movie;
 import com.app.cinema.repositories.MovieRepository;
@@ -14,6 +15,9 @@ import com.app.cinema.repositories.MovieRepository;
 public class MovieService {
     @Autowired
     MovieRepository movieRepository;
+
+    @Autowired
+    CinemaBot cinemaBot;
 
     public List<Movie> getAllMovies() {
         return (List<Movie>) movieRepository.findAll();
@@ -31,7 +35,11 @@ public class MovieService {
         Movie movie = new Movie();
         movie.setName(movieRequest.getName());
         movie.setTimeDuration(movieRequest.getTimeDuration());
-        return movieRepository.save(movie);
+        Movie saved = movieRepository.save(movie);
+
+        cinemaBot.notifyNewMovie(saved.getName());
+    
+        return saved;
     }
 
     public Movie updateMovie(Long id, MovieRequest movieRequest) {
