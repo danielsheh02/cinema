@@ -25,6 +25,11 @@ spec:
           value: cinemadb
         - name: SPRING_DATASOURCE_PASSWORD
           value: cinemadb
+        - name: TELEGRAM_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: telegram-bot-secret
+              key: TELEGRAM_BOT_TOKEN
         resources:
           requests:
             cpu: "1000m"

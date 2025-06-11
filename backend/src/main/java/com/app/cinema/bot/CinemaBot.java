@@ -91,4 +91,11 @@ public class CinemaBot extends TelegramLongPollingBot {
             sendText(chatId, message);
         }
     }
+
+    public void notifyDeleteMovie(String movieName) {
+        String message = "❌ Фильм \"" + movieName + "\" был удален!";
+        for (String chatId : userChatIds) {
+            sendText(chatId, message);
+        }
+    }
 }

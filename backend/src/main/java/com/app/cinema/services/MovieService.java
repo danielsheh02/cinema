@@ -53,6 +53,10 @@ public class MovieService {
     }
 
     public void deleteMovie(Long id) {
+        Movie movie = movieRepository.findById(id).orElse(null);
+        if (movie != null) {
+            cinemaBot.notifyDeleteMovie(movie.getName());
+        }
         movieRepository.deleteById(id);
     }
 
