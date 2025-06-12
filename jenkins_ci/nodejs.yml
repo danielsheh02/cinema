@@ -18,27 +18,26 @@ pipeline {
                     sh 'node --version'
                     sh 'npm install'
                     sh 'CI=false npm run build --if-present'
-                    archiveArtifacts artifacts: '**/*', fingerprint: true
                 }
             }
         }
         stage('Test') {
             steps {
                 dir(env.FRONTEND_DIR) {
-                    sh 'npm test:coverage'
+                    sh 'npm run test:coverage'
                 }
             }
         }
 
         stage('SonarQube Analysis') {
           steps {
-            script {
-              def scannerHome = tool 'SonarScanner';
-              withSonarQubeEnv('sonar-cinema') {
-                sh """
-                ${scannerHome}/bin/sonar-scanner \
-                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                """
+            dir(env.FRONTEND_DIR) {
+              script {
+                withSonarQubeEnv('sonar-cinema') {
+                  sh """
+                  npm run sonar
+                  """
+                }
               }
             }
           }
