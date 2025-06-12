@@ -27,7 +27,7 @@ jobs:
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
         
-    - run: npm ci
+    - run: npm install
     - run: CI=false npm run build --if-present
 
     - name: Upload build artifact
@@ -64,5 +64,5 @@ jobs:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
 
-      - run: npm ci
+      - run: npm install
       - run: npm test

@@ -8,40 +8,39 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/danielsheh02/cinema'
             }
         }
         
         stage('Build') {
             steps {
                 dir(env.FRONTEND_DIR) {
-                    nodejs() {  
-                        sh 'npm ci'
-                        sh 'CI=false npm run build --if-present'
-                    }
+                    sh 'node --version'
+                    sh 'npm install'
+                    sh 'CI=false npm run build --if-present'
                     archiveArtifacts artifacts: '**/*', fingerprint: true
                 }
             }
         }
-        
         stage('Test') {
             steps {
                 dir(env.FRONTEND_DIR) {
-                    nodejs() {  
-                        sh 'npm ci'
-                        sh 'npm test:coverage'
-                    }
+                    sh 'npm test:coverage'
                 }
             }
         }
 
         stage('SonarQube Analysis') {
-          def scannerHome = tool 'SonarScanner';
-          withSonarQubeEnv('sonar-cinema') {
-            sh """
-              ${scannerHome}/bin/sonar-scanner \ 
-              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            """
+          steps {
+            script {
+              def scannerHome = tool 'SonarScanner';
+              withSonarQubeEnv('sonar-cinema') {
+                sh """
+                ${scannerHome}/bin/sonar-scanner \
+                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                """
+              }
+            }
           }
         }
     }
