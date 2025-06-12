@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    
+    environment {
+        FRONTEND_DIR = './frontend'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                dir(env.FRONTEND_DIR) {
+                    nodejs() {  
+                        sh 'npm ci'
+                        sh 'CI=false npm run build --if-present'
+                    }
+                    archiveArtifacts artifacts: '**/*', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                dir(env.FRONTEND_DIR) {
+                    nodejs() {  
+                        sh 'npm ci'
+                        sh 'npm test:coverage'
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+          def scannerHome = tool 'SonarScanner';
+          withSonarQubeEnv('sonar-cinema') {
+            sh """
+              ${scannerHome}/bin/sonar-scanner \ 
+              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            """
+          }
+        }
+    }
+}
