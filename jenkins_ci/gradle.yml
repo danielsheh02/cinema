@@ -2,17 +2,19 @@ pipeline {
     agent any
 
     environment {
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64' // укажите ваш путь к JDK 17
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
         PATH = "${JAVA_HOME}/bin:${PATH}"
         WORKDIR = './backend'
-        SONAR_HOST_URL = 'http://localhost:9000/' // Замените на ваш SonarQube URL
-        SONAR_TOKEN = credentials('sonarqube-token') // Токен из Jenkins Credentials
+        SONAR_HOST_URL = 'http://localhost:9000/'
+        SONAR_TOKEN = credentials('sonarqube-token')
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_IMAGE = 'danielsheh/cinema_cinemaapp'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/danielsheh02/cinema' // укажите URL вашего репозитория
+                git branch: 'main', url: 'https://github.com/danielsheh02/cinema'
             }
         }
 
@@ -34,37 +36,42 @@ pipeline {
             }
         }
 
+        stage('Build image and Push') {
+            steps {
+                dir(env.WORKDIR) {
+                    withCredentials([usernamePassword(credentialsId: 'log-docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                            docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+                            docker build -t $DOCKER_IMAGE .
+                            docker tag $DOCKER_IMAGE $DOCKER_IMAGE:latest
+                            docker push $DOCKER_IMAGE:latest
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 dir(env.WORKDIR) {
-                    withSonarQubeEnv('SonarQube') { // Настроенный в Jenkins сервер SonarQube
+                    withSonarQubeEnv('sonar-cinema') {
                         sh """
                         ./gradlew sonar \
                           -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
-                          -Dsonar.qualitygate.wait=true // Ждём проверки Quality Gate
+                          -Dsonar.qualitygate.wait=true
                         """
                     }
                 }
             }
         }
 
-        stage('Dependency Submission') {
-            steps {
-                dir(env.WORKDIR) {
-                    // Аналог GitHub Actions "gradle/actions/dependency-submission"
-                    // Здесь можно использовать скрипт для анализа зависимостей, например:
-                    sh './gradlew dependencies > dependencies.txt'
-                    archiveArtifacts artifacts: 'dependencies.txt', fingerprint: true
-                }
-            }
-        }
     }
 
     post {
         always {
             dir(env.WORKDIR) {
-                junit 'build/test-results/**/*.xml' // публикация результатов тестов
-                archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true // сохранение артефактов
+                junit 'build/test-results/**/*.xml'
+                archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
             }
         }
     }
