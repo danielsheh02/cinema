@@ -10,10 +10,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class MovieServiceTest {
@@ -65,5 +68,94 @@ class MovieServiceTest {
         assertEquals("New", updated.getName());
         assertEquals(Duration.ofMinutes(120), updated.getTimeDuration());
     }
+
+    @Test
+void deleteMovie_ShouldNotifyAndDelete_WhenMovieExists() {
+    Movie movie = new Movie();
+    movie.setId(1L);
+    movie.setName("Test Movie");
+
+    when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
+    doNothing().when(movieRepository).deleteById(1L);
+    doNothing().when(cinemaBot).notifyDeleteMovie(movie.getName());
+
+    movieService.deleteMovie(1L);
+
+    verify(movieRepository).deleteById(1L);
+    verify(cinemaBot).notifyDeleteMovie("Test Movie");
+}
+
+@Test
+void deleteMovie_ShouldDeleteWithoutNotify_WhenMovieDoesNotExist() {
+    when(movieRepository.findById(1L)).thenReturn(Optional.empty());
+    doNothing().when(movieRepository).deleteById(1L);
+
+    movieService.deleteMovie(1L);
+
+    verify(movieRepository).deleteById(1L);
+    verify(cinemaBot, never()).notifyDeleteMovie(anyString());
+}
+
+@Test
+void getAllMovies_ShouldReturnListOfMovies() {
+    Movie movie1 = new Movie();
+    movie1.setId(1L);
+    movie1.setName("Movie 1");
+
+    Movie movie2 = new Movie();
+    movie2.setId(2L);
+    movie2.setName("Movie 2");
+
+    when(movieRepository.findAll()).thenReturn(List.of(movie1, movie2));
+
+    List<Movie> movies = movieService.getAllMovies();
+
+    assertNotNull(movies);
+    assertEquals(2, movies.size());
+    assertEquals("Movie 1", movies.get(0).getName());
+}
+
+@Test
+void getMovie_ShouldReturnMovie_WhenFound() {
+    Movie movie = new Movie();
+    movie.setId(1L);
+    movie.setName("Movie 1");
+
+    when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
+
+    Movie result = movieService.getMovie(1L);
+
+    assertNotNull(result);
+    assertEquals("Movie 1", result.getName());
+}
+
+@Test
+void getMovie_ShouldReturnNull_WhenNotFound() {
+    when(movieRepository.findById(1L)).thenReturn(Optional.empty());
+
+    Movie result = movieService.getMovie(1L);
+
+    assertNull(result);
+}
+
+@Test
+void getAllMoviesById_ShouldReturnSetOfMovies() {
+    Movie movie1 = new Movie();
+    movie1.setId(1L);
+    movie1.setName("Movie 1");
+
+    Movie movie2 = new Movie();
+    movie2.setId(2L);
+    movie2.setName("Movie 2");
+
+    List<Long> ids = List.of(1L, 2L);
+
+    when(movieRepository.findAllById(ids)).thenReturn(Set.of(movie1, movie2));
+
+    Set<Movie> movies = movieService.getAllMoviesById(ids);
+
+    assertNotNull(movies);
+    assertEquals(2, movies.size());
+}
 }
 

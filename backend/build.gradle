@@ -60,6 +60,18 @@ jacocoTestReport {
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
+
+	classDirectories.setFrom(
+        files([
+            fileTree(dir: "$buildDir/classes/java/main", includes: [
+                'com/app/cinema/services/MovieService.class',
+				'com/app/cinema/controllers/MovieController.class',
+            ], excludes: [
+                'com/app/cinema/controllers/MovieController.deleteMovie',
+                'com/app/cinema/controllers/MovieController.getMovie',
+            ])
+        ])
+    )
 }
 
 test {

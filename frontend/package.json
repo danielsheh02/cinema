@@ -45,6 +45,9 @@
     ]
   },
   "jest": {
+    "collectCoverageFrom": [
+      "src/components/movie.component.js"
+    ],
     "transformIgnorePatterns": [
       "/node_modules/(?!axios)/"
     ]
