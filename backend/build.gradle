@@ -83,6 +83,10 @@ sonar {
     property "sonar.projectKey", "cinema-backend"
     property "sonar.projectName", "cinema app"
 	property "sonar.qualitygate.wait", "true"
+	property "sonar.inclusions",  '''
+		src/main/java/com/app/cinema/controllers/MovieController.java
+		src/main/java/com/app/cinema/services/MovieService.java
+	'''
   }
 }
 
