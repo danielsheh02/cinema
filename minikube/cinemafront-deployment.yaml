@@ -13,6 +13,10 @@ spec:
       labels:
         app: cinemafront
     spec:
+      initContainers:
+        - name: wait-for-backend
+          image: busybox
+          command: ['sh', '-c', 'until nc -z cinemaapp 7999; do echo waiting for cinemaapp; sleep 2; done']
       containers:
         - name: cinemafront
           image: danielsheh/cinema_cinemafront:latest

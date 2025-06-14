@@ -13,9 +13,14 @@ spec:
       labels:
         app: cinemaapp
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command: ['sh', '-c', 'until nc -z cinemadb 5432; do echo waiting for cinemadb; sleep 2; done']
       containers:
       - name: cinemaapp
         image: danielsheh/cinema_cinemaapp:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 7999
         env:

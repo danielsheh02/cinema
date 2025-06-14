@@ -1,0 +1,29 @@
+pipeline {
+    agent { label 'jenkins-for-minikube' }
+    
+    environment {
+        DEPLOYMENT_NAME = 'cinemaapp'
+    }
+    
+    stages {
+        stage('Rollout Restart') {
+            steps {
+                script {
+                    sh "kubectl rollout restart deployment/${env.DEPLOYMENT_NAME}"
+                    
+                    echo "Waiting for rollout to complete..."
+                    sh "kubectl rollout status deployment/${env.DEPLOYMENT_NAME} --timeout=300s"
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "Deployment ${env.DEPLOYMENT_NAME} successfully restarted!"
+        }
+        failure {
+            echo "Failed to restart deployment ${env.DEPLOYMENT_NAME}"
+        }
+    }
+}
