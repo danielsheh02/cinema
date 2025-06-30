@@ -28,7 +28,6 @@ public class MovieController {
         try {
             return ResponseEntity.ok().body(movieService.getAllMovies());
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -43,7 +42,6 @@ public class MovieController {
                 return new ResponseEntity<>(new AuthExc("Не найдено"), HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -54,7 +52,6 @@ public class MovieController {
             Movie updatedMovie = movieService.updateMovie(id, movieRequest);
             return ResponseEntity.ok().body(updatedMovie);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -65,7 +62,6 @@ public class MovieController {
             Movie movie = movieService.createMovie(movieRequest);
             return ResponseEntity.ok().body(movie);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -76,7 +72,6 @@ public class MovieController {
             movieService.deleteMovie(id);
             return ResponseEntity.ok().body("Удалено");
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
